@@ -17,7 +17,7 @@ export default function SearchBar({ value, onChange, onClear, placeholder = "ค
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-13 pr-10 py-3.5 bg-white rounded-full border border-orange-200 text-stone-800 placeholder:text-stone-400 text-base shadow-xs focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:border-orange-400 transition-all"
+          className="search-input"
         />
         {value && (
           <button
