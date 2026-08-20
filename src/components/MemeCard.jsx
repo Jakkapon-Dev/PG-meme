@@ -1,11 +1,32 @@
+import { useSound } from "../contexts/SoundContext";
+
 export default function MemeCard({ meme, isLiked, onLike, onClick, selectionMode = false, isSelected = false, onSelect }) {
+  const { playSound } = useSound();
   const currentLikes = meme.likes + (isLiked ? 1 : 0);
 
-  const handleClick = selectionMode ? (e) => onSelect?.(e, meme.id) : onClick;
+  const handleCardClick = (e) => {
+    if (selectionMode) {
+      playSound("pop");
+      onSelect?.(e, meme.id);
+    } else {
+      playSound("whoosh");
+      onClick?.(e);
+    }
+  };
+
+  const handleLikeClick = (e) => {
+    e.stopPropagation();
+    if (isLiked) {
+      playSound("unlike");
+    } else {
+      playSound("heart");
+    }
+    onLike?.(e, meme.id);
+  };
 
   return (
     <div
-      onClick={handleClick}
+      onClick={handleCardClick}
       className={`bg-white rounded-3xl overflow-hidden border shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col cursor-pointer group ${
         isSelected ? "border-orange-400 ring-2 ring-orange-300" : "border-orange-100/90"
       }`}
@@ -14,7 +35,11 @@ export default function MemeCard({ meme, isLiked, onLike, onClick, selectionMode
       <div className="relative aspect-4/3 w-full bg-stone-900 overflow-hidden flex items-center justify-center">
         {selectionMode && (
           <div
-            onClick={(e) => { e.stopPropagation(); onSelect?.(e, meme.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              playSound("pop");
+              onSelect?.(e, meme.id);
+            }}
             className={`absolute top-2.5 left-2.5 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${
               isSelected
                 ? "bg-orange-500 border-orange-500"
@@ -84,8 +109,8 @@ export default function MemeCard({ meme, isLiked, onLike, onClick, selectionMode
 
           {!selectionMode && (
             <button
-              onClick={(e) => onLike(e, meme.id)}
-              className={`text-xs flex items-center gap-1 font-semibold transition-colors cursor-pointer ${
+              onClick={handleLikeClick}
+              className={`text-xs flex items-center gap-1 font-semibold transition-colors cursor-pointer active:scale-125 duration-150 ${
                 isLiked ? "text-rose-500" : "text-stone-400 hover:text-rose-500"
               }`}
               title="กดถูกใจ"
@@ -103,3 +128,4 @@ export default function MemeCard({ meme, isLiked, onLike, onClick, selectionMode
     </div>
   );
 }
+

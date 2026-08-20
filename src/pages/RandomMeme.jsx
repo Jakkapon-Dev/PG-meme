@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useFavorites } from "../contexts/FavoritesContext";
+import { useSound } from "../contexts/SoundContext";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&auto=format&fit=crop&q=80";
 
 export default function RandomMeme() {
   const { memes, loading, toggleLike, isLiked } = useFavorites();
+  const { playSound } = useSound();
   const [currentMeme, setCurrentMeme] = useState(null);
 
   // สุ่มมีมหนึ่งตัว โดยพยายามไม่ซ้ำกับตัวปัจจุบัน
@@ -23,6 +25,7 @@ export default function RandomMeme() {
   }, [memes, currentMeme, pickRandomMeme]);
 
   const handleNext = () => {
+    playSound("dice");
     setCurrentMeme(pickRandomMeme(memes, currentMeme));
   };
 
@@ -30,6 +33,11 @@ export default function RandomMeme() {
 
   const handleLike = () => {
     if (currentMeme) {
+      if (liked) {
+        playSound("unlike");
+      } else {
+        playSound("heart");
+      }
       toggleLike(currentMeme.id);
     }
   };
@@ -96,7 +104,7 @@ export default function RandomMeme() {
               </button>
               <button
                 onClick={handleNext}
-                className="flex-1 py-3.5 rounded-full bg-orange-500 text-white font-bold text-sm shadow-md shadow-orange-500/25 hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all cursor-pointer"
+                className="flex-1 py-3.5 rounded-full bg-orange-500 text-white font-bold text-sm shadow-md shadow-orange-500/25 hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all cursor-pointer active:scale-95"
               >
                 🎲 ถัดไป
               </button>
@@ -107,3 +115,4 @@ export default function RandomMeme() {
     </div>
   );
 }
+

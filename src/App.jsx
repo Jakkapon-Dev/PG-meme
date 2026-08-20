@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
+import { SoundProvider } from "./contexts/SoundContext";
 import Layout from "./components/Layout";
 import RandomMeme from "./pages/RandomMeme";
 import MemeCategory from "./pages/MemeCategory";
@@ -24,8 +25,11 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <FavoritesProvider>
-      <RouterProvider router={router} />
-    </FavoritesProvider>
+    <SoundProvider>
+      <FavoritesProvider>
+        <RouterProvider router={router} />
+      </FavoritesProvider>
+    </SoundProvider>
   );
 }
+

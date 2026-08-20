@@ -1,4 +1,13 @@
+import { useSound } from "../contexts/SoundContext";
+
 export default function SearchBar({ value, onChange, onClear, placeholder = "ค้นหาชื่อมีม..." }) {
+  const { playSound } = useSound();
+
+  const handleClear = () => {
+    playSound("pop");
+    onClear();
+  };
+
   return (
     <div className="relative max-w-2xl mx-auto mt-2">
       <div className="relative flex items-center">
@@ -21,7 +30,7 @@ export default function SearchBar({ value, onChange, onClear, placeholder = "ค
         />
         {value && (
           <button
-            onClick={onClear}
+            onClick={handleClear}
             className="absolute right-4 text-stone-400 hover:text-stone-600 p-1 text-sm font-bold cursor-pointer"
             aria-label="Clear search"
           >
@@ -32,3 +41,4 @@ export default function SearchBar({ value, onChange, onClear, placeholder = "ค
     </div>
   );
 }
+

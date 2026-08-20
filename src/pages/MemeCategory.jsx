@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import SearchBar from "../components/SearchBar";
 import CategoryFilters from "../components/CategoryFilters";
 import MemeCard from "../components/MemeCard";
 import MemeModal from "../components/MemeModal";
 import { useFavorites } from "../contexts/FavoritesContext";
+import { useSound } from "../contexts/SoundContext";
 
 const CATEGORIES = [
   { id: "all", label: "ทั้งหมด", icon: "✨" },
@@ -15,6 +16,7 @@ const CATEGORIES = [
 
 export default function MemeCategory() {
   const { memes: contextMemes, loading: contextLoading, isLiked, toggleLike, bulkAddFavorites } = useFavorites();
+  const { playSound } = useSound();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [localMemes, setLocalMemes] = useState([]);
@@ -66,15 +68,18 @@ export default function MemeCategory() {
   };
 
   const toggleSelectionMode = () => {
+    playSound("pop");
     setSelectionMode((prev) => !prev);
     setSelectedIds([]);
   };
 
   const handleBulkAdd = () => {
+    playSound("tada");
     bulkAddFavorites(selectedIds);
     setSelectedIds([]);
     setSelectionMode(false);
   };
+
 
   return (
     <div className="space-y-6">

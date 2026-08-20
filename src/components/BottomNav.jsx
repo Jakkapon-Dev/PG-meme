@@ -1,12 +1,16 @@
 import { NavLink } from "react-router-dom";
+import { useSound } from "../contexts/SoundContext";
 
 export default function BottomNav({ activeTab }) {
+  const { playSound, openSoundboard } = useSound();
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-orange-100/80 px-6 py-2 shadow-lg md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-orange-100/80 px-4 py-2 shadow-lg md:hidden">
       <div className="max-w-md mx-auto flex items-center justify-around relative">
         {/* Random Tab */}
         <NavLink
           to="/"
+          onClick={() => playSound("pop")}
           className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
             activeTab === "random" ? "text-orange-600 font-bold" : "text-stone-400 hover:text-stone-600"
           }`}
@@ -18,6 +22,7 @@ export default function BottomNav({ activeTab }) {
         {/* Categories / Search Button */}
         <NavLink
           to="/memecategory"
+          onClick={() => playSound("pop")}
           className="flex flex-col items-center -mt-5 group"
         >
           <div className="w-12 h-12 rounded-full bg-linear-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-md shadow-orange-500/30 group-hover:scale-105 transition-transform">
@@ -38,6 +43,7 @@ export default function BottomNav({ activeTab }) {
         {/* Favorites Tab */}
         <NavLink
           to="/favorites"
+          onClick={() => playSound("pop")}
           className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
             activeTab === "favorites" ? "text-orange-600 font-bold" : "text-stone-400 hover:text-stone-600"
           }`}
@@ -52,7 +58,20 @@ export default function BottomNav({ activeTab }) {
           </svg>
           รายการโปรด
         </NavLink>
+
+        {/* Mobile Soundboard trigger */}
+        <button
+          onClick={() => {
+            playSound("pop");
+            openSoundboard();
+          }}
+          className="flex flex-col items-center gap-1 text-xs font-medium text-stone-400 hover:text-orange-600 transition-colors cursor-pointer"
+        >
+          <span className="text-xl">📢</span>
+          ซาวด์
+        </button>
       </div>
     </div>
   );
 }
+

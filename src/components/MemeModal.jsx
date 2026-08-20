@@ -1,22 +1,46 @@
 import { useEffect } from "react";
+import { useSound } from "../contexts/SoundContext";
 
 export default function MemeModal({ meme, isLiked, onLike, onClose }) {
+  const { playSound } = useSound();
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
+        playSound("whoosh");
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  }, [onClose, playSound]);
 
   if (!meme) return null;
+
+  const handleClose = () => {
+    playSound("whoosh");
+    onClose();
+  };
+
+  const handleLikeClick = (e) => {
+    if (isLiked) {
+      playSound("unlike");
+    } else {
+      playSound("heart");
+    }
+    onLike(e, meme.id);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard?.writeText(meme.image);
+    playSound("copy");
+    alert("คัดลอกลิงก์รูปมีมเรียบร้อยแล้ว! 🔗");
+  };
 
   return (
     <div
       className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl animate-scaleUp"
@@ -33,7 +57,7 @@ export default function MemeModal({ meme, isLiked, onLike, onClose }) {
             }}
           />
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center transition-colors cursor-pointer"
             aria-label="Close modal"
           >
@@ -54,8 +78,12 @@ export default function MemeModal({ meme, isLiked, onLike, onClose }) {
               </p>
             </div>
             <button
-              onClick={(e) => onLike(e, meme.id)}
-              className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 font-bold text-sm flex items-center gap-1.5 hover:bg-rose-100 transition-colors cursor-pointer"
+              onClick={handleLikeClick}
+              className={`px-4 py-2 rounded-full font-bold text-sm flex items-center gap-1.5 transition-all cursor-pointer ${
+                isLiked
+                  ? "bg-rose-500 text-white shadow-md shadow-rose-500/25"
+                  : "bg-rose-50 text-rose-600 hover:bg-rose-100"
+              }`}
             >
               {isLiked ? "❤️" : "🤍"} {meme.likes + (isLiked ? 1 : 0)}
             </button>
@@ -67,16 +95,14 @@ export default function MemeModal({ meme, isLiked, onLike, onClose }) {
               href={meme.image}
               target="_blank"
               rel="noreferrer"
+              onClick={() => playSound("pop")}
               className="flex-1 py-3 text-center rounded-full bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors shadow-md shadow-orange-500/25"
             >
               📥 ดูรูปต้นฉบับ
             </a>
             <button
-              onClick={() => {
-                navigator.clipboard?.writeText(meme.image);
-                alert("คัดลอกลิงก์รูปมีมเรียบร้อยแล้ว! 🔗");
-              }}
-              className="px-5 py-3 rounded-full border border-stone-200 text-stone-700 font-semibold text-sm hover:bg-stone-50 transition-colors cursor-pointer"
+              onClick={handleCopyLink}
+              className="px-5 py-3 rounded-full border border-stone-200 text-stone-700 font-semibold text-sm hover:bg-stone-50 hover:border-stone-300 transition-colors cursor-pointer active:scale-95"
             >
               คัดลอกลิงก์
             </button>
@@ -86,3 +112,4 @@ export default function MemeModal({ meme, isLiked, onLike, onClose }) {
     </div>
   );
 }
+

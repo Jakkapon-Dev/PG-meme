@@ -3,9 +3,11 @@ import { useState } from "react";
 import MemeCard from "../components/MemeCard";
 import MemeModal from "../components/MemeModal";
 import { useFavorites } from "../contexts/FavoritesContext";
+import { useSound } from "../contexts/SoundContext";
 
 export default function Favorites() {
   const { likedMemes, isLiked, toggleLike, bulkRemoveFavorites, loading } = useFavorites();
+  const { playSound } = useSound();
   const [selectedMeme, setSelectedMeme] = useState(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -23,15 +25,18 @@ export default function Favorites() {
   };
 
   const toggleSelectionMode = () => {
+    playSound("pop");
     setSelectionMode((prev) => !prev);
     setSelectedIds([]);
   };
 
   const handleBulkRemove = () => {
+    playSound("trash");
     bulkRemoveFavorites(selectedIds);
     setSelectedIds([]);
     setSelectionMode(false);
   };
+
 
   return (
     <div className="space-y-6">
