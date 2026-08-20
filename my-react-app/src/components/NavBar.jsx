@@ -80,15 +80,13 @@ export default function Navbar() {
           >
             🔥 มีมยอดฮิต
           </button>
-          <button
-            onClick={() => {
-              alert("คลังมีมที่คุณบันทึกไว้");
-              setIsMenuOpen(false);
-            }}
-            className="text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
+          <NavLink
+            to="/favorites"
+            onClick={() => setIsMenuOpen(false)}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
           >
             ⭐ รายการโปรด
-          </button>
+          </NavLink>
         </div>
       )}
     </header>

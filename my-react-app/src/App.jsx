@@ -1,7 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { FavoritesProvider } from "./contexts/FavoritesContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
-
+import Favorites from "./pages/Favorites";
 
 const router = createBrowserRouter([
   {
@@ -14,10 +15,15 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "/", element: <Home /> },
+      { path: "/favorites", element: <Favorites /> },
     ],
   },
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <FavoritesProvider>
+      <RouterProvider router={router} />
+    </FavoritesProvider>
+  );
 }
