@@ -1,13 +1,33 @@
-export default function MemeCard({ meme, isLiked, onLike, onClick }) {
+export default function MemeCard({ meme, isLiked, onLike, onClick, selectionMode = false, isSelected = false, onSelect }) {
   const currentLikes = meme.likes + (isLiked ? 1 : 0);
+
+  const handleClick = selectionMode ? (e) => onSelect?.(e, meme.id) : onClick;
 
   return (
     <div
-      onClick={onClick}
-      className="bg-white rounded-3xl overflow-hidden border border-orange-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col cursor-pointer group"
+      onClick={handleClick}
+      className={`bg-white rounded-3xl overflow-hidden border shadow-xs hover:shadow-md hover:-translate-y-1 transition-all flex flex-col cursor-pointer group ${
+        isSelected ? "border-orange-400 ring-2 ring-orange-300" : "border-orange-100/90"
+      }`}
     >
       {/* ภาพมีมพร้อม Badge */}
       <div className="relative aspect-4/3 w-full bg-stone-900 overflow-hidden flex items-center justify-center">
+        {selectionMode && (
+          <div
+            onClick={(e) => { e.stopPropagation(); onSelect?.(e, meme.id); }}
+            className={`absolute top-2.5 left-2.5 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer ${
+              isSelected
+                ? "bg-orange-500 border-orange-500"
+                : "bg-white/80 border-stone-300 hover:border-orange-400"
+            }`}
+          >
+            {isSelected && (
+              <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </div>
+        )}
         <img
           src={meme.image}
           alt={meme.title}
@@ -62,20 +82,22 @@ export default function MemeCard({ meme, isLiked, onLike, onClick }) {
             <span className="truncate">{meme.author}</span>
           </div>
 
-          <button
-            onClick={(e) => onLike(e, meme.id)}
-            className={`text-xs flex items-center gap-1 font-semibold transition-colors cursor-pointer ${
-              isLiked ? "text-rose-500" : "text-stone-400 hover:text-rose-500"
-            }`}
-            title="กดถูกใจ"
-          >
-            <span>{isLiked ? "❤️" : "🤍"}</span>
-            <span>
-              {currentLikes >= 1000
-                ? `${(currentLikes / 1000).toFixed(1)}k`
-                : currentLikes}
-            </span>
-          </button>
+          {!selectionMode && (
+            <button
+              onClick={(e) => onLike(e, meme.id)}
+              className={`text-xs flex items-center gap-1 font-semibold transition-colors cursor-pointer ${
+                isLiked ? "text-rose-500" : "text-stone-400 hover:text-rose-500"
+              }`}
+              title="กดถูกใจ"
+            >
+              <span>{isLiked ? "❤️" : "🤍"}</span>
+              <span>
+                {currentLikes >= 1000
+                  ? `${(currentLikes / 1000).toFixed(1)}k`
+                  : currentLikes}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </div>
