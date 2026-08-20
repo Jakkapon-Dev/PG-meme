@@ -1,7 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
 import Layout from "./components/Layout";
-import Home from "./pages/Home";
+import RandomMeme from "./pages/RandomMeme";
+import MemeCategory from "./pages/MemeCategory";
 import Favorites from "./pages/Favorites";
 
 const router = createBrowserRouter([
@@ -14,7 +15,8 @@ const router = createBrowserRouter([
       </div>
     ),
     children: [
-      { path: "/", element: <Home /> },
+      { path: "/", element: <RandomMeme /> },
+      { path: "/memecategory", element: <MemeCategory /> },
       { path: "/favorites", element: <Favorites /> },
     ],
   },

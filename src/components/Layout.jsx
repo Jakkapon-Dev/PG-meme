@@ -4,7 +4,12 @@ import BottomNav from "./BottomNav.jsx";
 
 export default function Layout() {
   const { pathname } = useLocation();
-  const activeTab = pathname === "/favorites" ? "favorites" : "feed";
+  const activeTab =
+    pathname === "/favorites"
+      ? "favorites"
+      : pathname === "/memecategory"
+      ? "category"
+      : "random";
 
   return (
     <div className="min-h-screen bg-[#fbf9f6] text-slate-800 flex flex-col font-sans pb-20 md:pb-8">

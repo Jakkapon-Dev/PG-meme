@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import SearchBar from "../components/SearchBar";
 import CategoryFilters from "../components/CategoryFilters";
 import MemeCard from "../components/MemeCard";
 import MemeModal from "../components/MemeModal";
-import { getMemes } from "../services/memeService";
 import { useFavorites } from "../contexts/FavoritesContext";
 
 const CATEGORIES = [
@@ -14,45 +13,30 @@ const CATEGORIES = [
   { id: "random", label: "สุ่มมีมใหม่", icon: "🎲" },
 ];
 
-export default function Home() {
-  const { isLiked, toggleLike, setMemeData, bulkAddFavorites } = useFavorites();
+export default function MemeCategory() {
+  const { memes: contextMemes, loading: contextLoading, isLiked, toggleLike, bulkAddFavorites } = useFavorites();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [memes, setMemes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [localMemes, setLocalMemes] = useState([]);
   const [selectedMeme, setSelectedMeme] = useState(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
 
-  const loadMemes = async () => {
-    try {
-      setError(null);
-      setLoading(true);
-      const data = await getMemes();
-      setMemes(data);
-      setMemeData(data);
-    } catch (err) {
-      console.error(err);
-      setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Imgflip API");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadMemes();
-  }, []);
+    if (contextMemes && contextMemes.length > 0) {
+      setLocalMemes(contextMemes);
+    }
+  }, [contextMemes]);
 
   const handleSelectCategory = (catId) => {
     setSelectedCategory(catId);
     if (catId === "random") {
-      setMemes((prev) => [...prev].sort(() => Math.random() - 0.5));
+      setLocalMemes((prev) => [...prev].sort(() => Math.random() - 0.5));
     }
   };
 
   const filteredMemes = useMemo(() => {
-    let list = memes.filter(
+    let list = localMemes.filter(
       (meme) =>
         meme.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         meme.author.toLowerCase().includes(searchQuery.toLowerCase())
@@ -67,7 +51,7 @@ export default function Home() {
     }
 
     return list;
-  }, [memes, searchQuery, selectedCategory]);
+  }, [localMemes, searchQuery, selectedCategory]);
 
   const handleLike = (e, id) => {
     e.stopPropagation();
@@ -131,16 +115,16 @@ export default function Home() {
             onClick={() => {
               setSelectedCategory("all");
               setSearchQuery("");
-              loadMemes();
+              if (contextMemes) setLocalMemes(contextMemes);
             }}
             className="text-xs md:text-sm font-semibold text-[#8B3A1C] hover:text-[#b44820] hover:underline cursor-pointer flex items-center gap-1"
           >
-            <span>🔄</span> รีเฟรชข้อมูล
+            <span>🔄</span> รีเซ็ต
           </button>
         </div>
       </div>
 
-      {loading && (
+      {contextLoading && localMemes.length === 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-5 py-8">
           {[...Array(8)].map((_, i) => (
             <div
@@ -155,20 +139,7 @@ export default function Home() {
         </div>
       )}
 
-      {error && !loading && (
-        <div className="text-center py-12 bg-rose-50 rounded-3xl border border-rose-200 p-8">
-          <span className="text-5xl">⚠️</span>
-          <h3 className="text-lg font-bold text-rose-800 mt-3">{error}</h3>
-          <button
-            onClick={loadMemes}
-            className="mt-4 px-6 py-2.5 bg-rose-600 text-white rounded-full font-bold text-sm hover:bg-rose-700 transition-colors cursor-pointer shadow-md"
-          >
-            ลองใหม่อีกครั้ง
-          </button>
-        </div>
-      )}
-
-      {!loading && !error && filteredMemes.length === 0 && (
+      {!contextLoading && filteredMemes.length === 0 && (
         <div className="text-center py-16 bg-white rounded-3xl border border-orange-100 p-8 shadow-xs">
           <span className="text-5xl">🧐</span>
           <h3 className="text-lg font-bold text-stone-700 mt-3">ไม่พบมีมที่คุณค้นหา</h3>
@@ -176,7 +147,7 @@ export default function Home() {
         </div>
       )}
 
-      {!loading && !error && filteredMemes.length > 0 && (
+      {filteredMemes.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-5">
           {filteredMemes.map((meme) => (
             <MemeCard
