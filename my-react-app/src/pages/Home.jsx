@@ -3,6 +3,7 @@ import SearchBar from "../components/SearchBar";
 import CategoryFilters from "../components/CategoryFilters";
 import MemeCard from "../components/MemeCard";
 import MemeModal from "../components/MemeModal";
+import { getMemes } from "../services/memeService";
 
 const CATEGORIES = [
   { id: "all", label: "ทั้งหมด", icon: "✨" },
@@ -21,35 +22,12 @@ export default function Home() {
   const [selectedMeme, setSelectedMeme] = useState(null);
   const [likedMap, setLikedMap] = useState({});
 
-  // ฟังก์ชันดึงข้อมูลมีมจาก Imgflip API
-  const fetchMemes = async () => {
+  // ฟังก์ชันดึงข้อมูลมีมผ่าน Service
+  const loadMemes = async () => {
     try {
       setError(null);
-      const response = await fetch("https://api.imgflip.com/get_memes");
-      const data = await response.json();
-
-      if (data.success && data.data?.memes) {
-        const formattedMemes = data.data.memes.map((m, index) => {
-          const baseLikes = Math.max(1000, 100000 - index * 950 + (parseInt(m.id, 10) % 3000));
-          return {
-            id: m.id,
-            title: m.name,
-            image: m.url,
-            width: m.width,
-            height: m.height,
-            boxCount: m.box_count,
-            author: `@MemeCreator_${m.id.slice(-3)}`,
-            authorAvatar: ["😼", "🐶", "🐸", "😎", "👾", "🦊", "🐼", "🔥"][index % 8],
-            likes: baseLikes,
-            isTop20: index < 20,
-            badge: index < 5 ? "Top 5" : index < 20 ? "Hot" : `${(baseLikes / 1000).toFixed(0)}k`,
-            badgeType: index < 5 ? "top" : index < 20 ? "hot" : "trending",
-          };
-        });
-        setMemes(formattedMemes);
-      } else {
-        throw new Error("ไม่สามารถโหลดข้อมูลมีมได้");
-      }
+      const data = await getMemes();
+      setMemes(data);
     } catch (err) {
       console.error(err);
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Imgflip API");
@@ -59,7 +37,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchMemes();
+    loadMemes();
   }, []);
 
   const handleSelectCategory = (catId) => {
@@ -126,7 +104,7 @@ export default function Home() {
           onClick={() => {
             setSelectedCategory("all");
             setSearchQuery("");
-            fetchMemes();
+            loadMemes();
           }}
           className="text-xs md:text-sm font-semibold text-[#8B3A1C] hover:text-[#b44820] hover:underline cursor-pointer flex items-center gap-1"
         >
@@ -156,7 +134,7 @@ export default function Home() {
           <span className="text-5xl">⚠️</span>
           <h3 className="text-lg font-bold text-rose-800 mt-3">{error}</h3>
           <button
-            onClick={fetchMemes}
+            onClick={loadMemes}
             className="mt-4 px-6 py-2.5 bg-rose-600 text-white rounded-full font-bold text-sm hover:bg-rose-700 transition-colors cursor-pointer shadow-md"
           >
             ลองใหม่อีกครั้ง
