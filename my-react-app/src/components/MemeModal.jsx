@@ -1,4 +1,16 @@
+import { useEffect } from "react";
+
 export default function MemeModal({ meme, isLiked, onLike, onClose }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   if (!meme) return null;
 
   return (
@@ -16,6 +28,9 @@ export default function MemeModal({ meme, isLiked, onLike, onClose }) {
             src={meme.image}
             alt={meme.title}
             className="max-h-[58vh] w-auto object-contain rounded-xl"
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=800&auto=format&fit=crop&q=80";
+            }}
           />
           <button
             onClick={onClose}
