@@ -4,6 +4,7 @@ import CategoryFilters from "../components/CategoryFilters";
 import MemeCard from "../components/MemeCard";
 import MemeModal from "../components/MemeModal";
 import { getMemes } from "../services/memeService";
+import { useFavorites } from "../contexts/FavoritesContext";
 
 const CATEGORIES = [
   { id: "all", label: "ทั้งหมด", icon: "✨" },
@@ -13,21 +14,24 @@ const CATEGORIES = [
   { id: "random", label: "สุ่มมีมใหม่", icon: "🎲" },
 ];
 
-export default function MemeCategory() {
+export default function Home() {
+  const { isLiked, toggleLike, setMemeData, bulkAddFavorites } = useFavorites();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [memes, setMemes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedMeme, setSelectedMeme] = useState(null);
-  const [likedMap, setLikedMap] = useState({});
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  // ฟังก์ชันดึงข้อมูลมีมผ่าน Service
   const loadMemes = async () => {
     try {
       setError(null);
+      setLoading(true);
       const data = await getMemes();
       setMemes(data);
+      setMemeData(data);
     } catch (err) {
       console.error(err);
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Imgflip API");
@@ -47,11 +51,11 @@ export default function MemeCategory() {
     }
   };
 
-  // กรองมีมตามคำค้นหาและหมวดหมู่
   const filteredMemes = useMemo(() => {
-    let list = memes.filter((meme) =>
-      meme.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      meme.author.toLowerCase().includes(searchQuery.toLowerCase())
+    let list = memes.filter(
+      (meme) =>
+        meme.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        meme.author.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (selectedCategory === "top") {
@@ -67,15 +71,29 @@ export default function MemeCategory() {
 
   const handleLike = (e, id) => {
     e.stopPropagation();
-    setLikedMap((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    toggleLike(id);
+  };
+
+  const handleSelect = (e, id) => {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectionMode = () => {
+    setSelectionMode((prev) => !prev);
+    setSelectedIds([]);
+  };
+
+  const handleBulkAdd = () => {
+    bulkAddFavorites(selectedIds);
+    setSelectedIds([]);
+    setSelectionMode(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* 1. ค้นหามีม */}
       <SearchBar
         value={searchQuery}
         onChange={setSearchQuery}
@@ -83,14 +101,12 @@ export default function MemeCategory() {
         placeholder="ค้นหาชื่อมีมจาก Imgflip (เช่น Drake, Cat, Doge...)"
       />
 
-      {/* 2. หมวดหมู่มีม */}
       <CategoryFilters
         categories={CATEGORIES}
         selectedCategory={selectedCategory}
         onSelectCategory={handleSelectCategory}
       />
 
-      {/* 3. ส่วนหัวข้อและปุ่มรีเฟรช */}
       <div className="flex justify-between items-center pt-2">
         <div className="flex items-center gap-2">
           <h2 className="text-xl md:text-2xl font-extrabold text-[#702a11] font-serif tracking-tight">
@@ -100,19 +116,30 @@ export default function MemeCategory() {
             {filteredMemes.length} มีม
           </span>
         </div>
-        <button
-          onClick={() => {
-            setSelectedCategory("all");
-            setSearchQuery("");
-            loadMemes();
-          }}
-          className="text-xs md:text-sm font-semibold text-[#8B3A1C] hover:text-[#b44820] hover:underline cursor-pointer flex items-center gap-1"
-        >
-          <span>🔄</span> รีเฟรชข้อมูล
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleSelectionMode}
+            className={`text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full transition-colors cursor-pointer flex items-center gap-1 ${
+              selectionMode
+                ? "bg-orange-500 text-white"
+                : "text-[#8B3A1C] hover:text-[#b44820] hover:bg-orange-50"
+            }`}
+          >
+            <span>✓</span> เลือก
+          </button>
+          <button
+            onClick={() => {
+              setSelectedCategory("all");
+              setSearchQuery("");
+              loadMemes();
+            }}
+            className="text-xs md:text-sm font-semibold text-[#8B3A1C] hover:text-[#b44820] hover:underline cursor-pointer flex items-center gap-1"
+          >
+            <span>🔄</span> รีเฟรชข้อมูล
+          </button>
+        </div>
       </div>
 
-      {/* 4. กำลังโหลดข้อมูล */}
       {loading && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-5 py-8">
           {[...Array(8)].map((_, i) => (
@@ -128,7 +155,6 @@ export default function MemeCategory() {
         </div>
       )}
 
-      {/* สถานะผิดพลาด */}
       {error && !loading && (
         <div className="text-center py-12 bg-rose-50 rounded-3xl border border-rose-200 p-8">
           <span className="text-5xl">⚠️</span>
@@ -142,7 +168,6 @@ export default function MemeCategory() {
         </div>
       )}
 
-      {/* ไม่พบผลลัพธ์ */}
       {!loading && !error && filteredMemes.length === 0 && (
         <div className="text-center py-16 bg-white rounded-3xl border border-orange-100 p-8 shadow-xs">
           <span className="text-5xl">🧐</span>
@@ -151,28 +176,49 @@ export default function MemeCategory() {
         </div>
       )}
 
-      {/* 5. รายการการ์ดมีม */}
       {!loading && !error && filteredMemes.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 md:gap-5">
           {filteredMemes.map((meme) => (
             <MemeCard
               key={meme.id}
               meme={meme}
-              isLiked={likedMap[meme.id]}
+              isLiked={isLiked(meme.id)}
               onLike={handleLike}
-              onClick={() => setSelectedMeme(meme)}
+              onClick={() => !selectionMode && setSelectedMeme(meme)}
+              selectionMode={selectionMode}
+              isSelected={selectedIds.includes(meme.id)}
+              onSelect={handleSelect}
             />
           ))}
         </div>
       )}
 
-      {/* 6. Modal พรีวิวมีม */}
       <MemeModal
         meme={selectedMeme}
-        isLiked={selectedMeme ? likedMap[selectedMeme.id] : false}
+        isLiked={selectedMeme ? isLiked(selectedMeme.id) : false}
         onLike={handleLike}
         onClose={() => setSelectedMeme(null)}
       />
+
+      {selectionMode && selectedIds.length > 0 && (
+        <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-orange-200 px-5 py-3 flex items-center gap-4 animate-fadeIn">
+          <span className="text-sm font-semibold text-stone-700">
+            เลือกแล้ว <span className="text-orange-600">{selectedIds.length}</span> มีม
+          </span>
+          <button
+            onClick={handleBulkAdd}
+            className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-bold hover:bg-orange-600 transition-colors cursor-pointer shadow-md shadow-orange-500/25"
+          >
+            ⭐ เพิ่มเข้ารายการโปรด
+          </button>
+          <button
+            onClick={toggleSelectionMode}
+            className="px-3 py-2 text-stone-500 hover:text-stone-700 text-sm font-semibold cursor-pointer"
+          >
+            ✕ ยกเลิก
+          </button>
+        </div>
+      )}
     </div>
   );
 }

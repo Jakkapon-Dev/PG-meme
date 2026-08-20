@@ -1,7 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { FavoritesProvider } from "./contexts/FavoritesContext";
 import Layout from "./components/Layout";
-import LandingPage from "./pages/landing-page";
-import MemeCategory from "./pages/memecategory";
+import Home from "./pages/Home";
+import Favorites from "./pages/Favorites";
 
 const router = createBrowserRouter([
   {
@@ -13,12 +14,16 @@ const router = createBrowserRouter([
       </div>
     ),
     children: [
-      { path: "/", element: <LandingPage /> },
-      { path: "/memecategory", element: <MemeCategory /> },
+      { path: "/", element: <Home /> },
+      { path: "/favorites", element: <Favorites /> },
     ],
   },
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <FavoritesProvider>
+      <RouterProvider router={router} />
+    </FavoritesProvider>
+  );
 }

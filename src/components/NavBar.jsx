@@ -4,8 +4,6 @@ import { NavLink } from "react-router-dom";
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const closeMenu = () => setIsMenuOpen(false);
-
   return (
     <header className="bg-[#fbf9f6] border-b border-orange-100/70 px-4 py-3.5 sticky top-0 z-30 shadow-xs">
       <div className="max-w-5xl mx-auto flex items-center justify-between">
@@ -35,7 +33,6 @@ export default function Navbar() {
         {/* หัวข้อตรงกลาง (ค้นหามีม) */}
         <NavLink
           to="/"
-          onClick={closeMenu}
           className="text-2xl md:text-3xl font-extrabold text-[#702a11] hover:text-[#943818] transition-colors flex items-center gap-2 font-serif tracking-tight"
         >
           <span>ค้นหามีม</span>
@@ -44,7 +41,6 @@ export default function Navbar() {
         {/* ไอคอนโปรไฟล์ด้านขวา (User Profile Icon) */}
         <NavLink
           to="/"
-          onClick={closeMenu}
           className="text-[#8B3A1C] hover:text-[#b44820] p-1.5 rounded-full hover:bg-orange-100/50 transition-colors focus:outline-none flex items-center justify-center cursor-pointer"
           aria-label="User Profile"
         >
@@ -70,27 +66,27 @@ export default function Navbar() {
         <div className="max-w-5xl mx-auto mt-3 pt-3 border-t border-orange-200/60 flex flex-col gap-2 animate-fadeIn">
           <NavLink
             to="/"
-            onClick={closeMenu}
+            onClick={() => setIsMenuOpen(false)}
             className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-orange-500/10 text-orange-800 hover:bg-orange-500/20 transition-colors"
           >
-            🎲 สุ่มมีม
-          </NavLink>
-          <NavLink
-            to="/memecategory"
-            onClick={closeMenu}
-            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
-          >
-            🔥 มีมยอดฮิต
+            🏠 หน้าแรก
           </NavLink>
           <button
             onClick={() => {
-              alert("คลังมีมที่คุณบันทึกไว้");
-              closeMenu();
+              alert("ระบบบันทึกมีมยอดนิยม");
+              setIsMenuOpen(false);
             }}
-            className="text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
+            className="text-left px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
+          >
+            🔥 มีมยอดฮิต
+          </button>
+          <NavLink
+            to="/favorites"
+            onClick={() => setIsMenuOpen(false)}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-stone-700 hover:bg-stone-100 transition-colors"
           >
             ⭐ รายการโปรด
-          </button>
+          </NavLink>
         </div>
       )}
     </header>
